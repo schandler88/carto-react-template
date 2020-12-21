@@ -11,7 +11,12 @@ import {
   removeSource,
   setViewState,
 } from '@carto/react/redux';
-import { AggregationTypes, CategoryWidget, FormulaWidget } from '@carto/react/widgets';
+import {
+  AggregationTypes,
+  SourceTypes,
+  CategoryWidget,
+  FormulaWidget,
+} from '@carto/react/widgets';
 
 import { currencyFormatter } from 'utils/formatter';
 
@@ -43,11 +48,12 @@ export default function Kpi() {
     dispatch(
       addSource({
         id: 'kpiSource',
-        data: `SELECT states.name, SUM(stores.revenue) as revenue, states.the_geom_webmercator
+        type: SourceTypes.TILE_LAYER,
+        data: `SELECT states.cartodb_id, states.name, SUM(stores.revenue) as revenue, states.the_geom_webmercator
           FROM ne_50m_admin_1_states as states
           JOIN retail_stores as stores
           ON ST_Intersects(states.the_geom_webmercator, stores.the_geom_webmercator)
-          GROUP BY states.name, states.the_geom_webmercator`,
+          GROUP BY states.cartodb_id, states.name, states.the_geom_webmercator`,
       })
     );
     // Add the layer
@@ -86,10 +92,10 @@ export default function Kpi() {
       <FormulaWidget
         title='Total revenue'
         dataSource='kpiSource'
+        dataLayer='kpiLayer'
         column='revenue'
         operation={AggregationTypes.SUM}
         formatter={currencyFormatter}
-        viewportFilter
         onError={onTotalRevenueWidgetError}
       ></FormulaWidget>
       <Divider />
@@ -97,11 +103,11 @@ export default function Kpi() {
         id='revenuByState'
         title='Revenue by state'
         dataSource='kpiSource'
+        dataLayer='kpiLayer'
         column='name'
         operationColumn='revenue'
         operation={AggregationTypes.SUM}
         formatter={currencyFormatter}
-        viewportFilter
         onError={onRevenueByStateWidgetError}
       />
 
