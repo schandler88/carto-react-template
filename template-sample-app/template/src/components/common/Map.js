@@ -69,8 +69,6 @@ export function Map(props) {
     }
   };
 
-  // deck.getMapboxMap()
-
   if (basemap.type === 'mapbox') {
     return (
       <DeckGL
